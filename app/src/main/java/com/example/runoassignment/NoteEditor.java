@@ -5,6 +5,8 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Base64;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -18,6 +20,10 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+
+import java.io.UnsupportedEncodingException;
+
+import static android.content.ContentValues.TAG;
 
 public class NoteEditor extends AppCompatActivity {
     String notes;
@@ -51,7 +57,7 @@ public class NoteEditor extends AppCompatActivity {
                     ViewNotes.notes = editTextDescription.getText().toString().trim();
                 }
                 savingprogress.setVisibility(View.VISIBLE);
-                FirebaseDatabase.getInstance().getReference("Users").child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child("notes").setValue(ViewNotes.notes).addOnCompleteListener(new OnCompleteListener<Void>() {
+                FirebaseDatabase.getInstance().getReference("Users").child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child("notes").setValue(base64encode(ViewNotes.notes)).addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull  Task<Void> task) {
                         if(task.isSuccessful()){
@@ -134,4 +140,14 @@ public class NoteEditor extends AppCompatActivity {
 //            }
 //        });
     }
+
+    public static String base64encode(String input) {
+        try {
+            return new String(Base64.encode(input.getBytes("UTF-8"), Base64.NO_WRAP), "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            Log.e(TAG, "Got unsupported encoding: " + e);
+            return "encode-error";
+        }
+    }
+
 }

@@ -9,6 +9,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Base64;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -29,9 +30,11 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.FirebaseDatabase;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashSet;
 
+import static android.content.ContentValues.TAG;
 import static com.example.runoassignment.R.menu.menu;
 
 public class ViewNotes extends AppCompatActivity {
@@ -83,7 +86,7 @@ public class ViewNotes extends AppCompatActivity {
                     Log.e("firebase", "Error getting data", task.getException());
                 }
                 else {
-                    notes=String.valueOf(task.getResult().getValue());
+                    notes=base64decode(String.valueOf(task.getResult().getValue()));
                     noteview.setText(notes);
                 }
             }
@@ -145,5 +148,13 @@ public class ViewNotes extends AppCompatActivity {
     public void logout(){
         FirebaseAuth.getInstance().signOut();
         startActivity(new Intent(ViewNotes.this,MainActivity.class));
+    }
+    public static String base64decode(String input) {
+        try {
+            return new String(Base64.decode(input.getBytes("UTF-8"), Base64.NO_WRAP), "UTF-8");
+        } catch (UnsupportedEncodingException | IllegalArgumentException e) {
+            Log.e(TAG, "Got unsupported encoding: " + e);
+            return "decode-error";
+        }
     }
 }

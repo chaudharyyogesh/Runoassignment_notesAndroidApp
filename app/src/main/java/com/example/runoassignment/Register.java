@@ -6,6 +6,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Base64;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -18,6 +20,12 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.FirebaseDatabase;
+
+import java.io.UnsupportedEncodingException;
+
+import javax.crypto.IllegalBlockSizeException;
+
+import static android.content.ContentValues.TAG;
 
 public class Register extends AppCompatActivity {
 
@@ -75,6 +83,14 @@ public class Register extends AppCompatActivity {
 
 
     }
+    public static String base64encode(String input) {
+        try {
+            return new String(Base64.encode(input.getBytes("UTF-8"), Base64.NO_WRAP), "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            Log.e(TAG, "Got unsupported encoding: " + e);
+            return "encode-error";
+        }
+    }
     public void register(){
 
         progressBar.setVisibility(View.VISIBLE);
@@ -83,7 +99,8 @@ public class Register extends AppCompatActivity {
             {
                 User user;
                 String notes="I am topic \nI am description.Click me to edit me or Click Add Note on top right to add new note. Click menu to logout.\n";
-                user = new User(name,phone,email,notes);
+                String encodedNotes=base64encode(notes);
+                user = new User(name,phone,email,encodedNotes);
 
                 try{
                     FirebaseDatabase.getInstance().getReference("Users").child(FirebaseAuth.getInstance().getCurrentUser().getUid()).setValue(user).addOnCompleteListener(task1 -> {
